@@ -362,7 +362,7 @@
     {
       id: "roast-tomato-soup",
       cat: "Soup",
-      title: "Scrambled Eggs",
+      title: "Roast Tomato & Basil Soup",
       dek: "Slow-roasted until sweet, blended with basil and a swirl of cream.",
       color: "#8A5A3B",
       time: "45 min",
@@ -514,6 +514,32 @@
       ],
       note: "Placeholder recipe — swap in your own method and photograph."
     }
+    {
+      id: "scrambled-eggs",
+      cat: "Breakfast",
+      title: "Soft Scrambled Eggs",
+      dek: "Low heat, constant motion, off the pan while they still look slightly underdone.",
+      color: "#D9A441",
+      image: "images/scrambled-eggs.jpeg",
+      time: "8 min",
+      serves: "1–2",
+      difficulty: "Easy",
+      ingredients: [
+        "4 large eggs",
+        "20 g butter",
+        "1 tbsp cream or milk (optional)",
+        "Salt, to taste",
+        "Chives, chopped (optional)"
+      ],
+      steps: [
+        "Whisk eggs with a pinch of salt and the cream, if using, until fully combined.",
+        "Melt butter in a non-stick pan over low heat.",
+        "Add eggs and stir slowly and constantly with a spatula, keeping the heat low.",
+        "Remove from the pan just before fully set — they'll finish cooking in the residual heat.",
+        "Scatter with chives and serve immediately."
+      ],
+      note: "Placeholder recipe — swap in your own method once you're happy with the wording."
+    }
   ];
 
   const grid = document.getElementById('recipe-grid');
@@ -526,9 +552,12 @@
     card.dataset.category = r.cat;
     card.href = '#' + r.id;
     card.onclick = (e) => { e.preventDefault(); showRecipe(r.id); };
+    const thumbStyle = r.image
+      ? `background-image:url('${r.image}');background-size:cover;background-position:center;`
+      : `background:${r.color};`;
     card.innerHTML = `
-      <div class="thumb" style="background:${r.color}">
-        <span class="ph-label">title image</span>
+      <div class="thumb" style="${thumbStyle}">
+        ${r.image ? '' : '<span class="ph-label">title image</span>'}
       </div>
       <div class="card-meta">
         <span class="cat">${r.cat}</span>
@@ -541,10 +570,13 @@
     const view = document.createElement('section');
     view.className = 'recipe-view';
     view.id = 'view-' + r.id;
+    const heroStyle = r.image
+      ? `background-image:url('${r.image}');background-size:cover;background-position:center;`
+      : `background:${r.color};`;
     view.innerHTML = `
       <a href="#" class="back-link" onclick="showContents();return false;">← Back to contents</a>
-      <div class="recipe-hero" style="background:${r.color}">
-        <span class="ph-label">title image</span>
+      <div class="recipe-hero" style="${heroStyle}">
+        ${r.image ? '' : '<span class="ph-label">title image</span>'}
       </div>
       <div class="recipe-header">
         <span class="cat">${r.cat}</span>
