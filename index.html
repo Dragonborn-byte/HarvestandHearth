@@ -528,11 +528,12 @@
     card.href = '#' + r.id;
     card.onclick = (e) => { e.preventDefault(); showRecipe(r.id); };
     card.innerHTML = `
-const thumbStyle = r.image
+const heroStyle = r.image
   ? `background-image:url('${r.image}');background-size:cover;background-position:center;`
   : `background:${r.color};`;
-card.innerHTML = `
-  <div class="thumb" style="${thumbStyle}">
+view.innerHTML = `
+  <a href="#" class="back-link" onclick="showContents();return false;">← Back to contents</a>
+  <div class="recipe-hero" style="${heroStyle}">
     ${r.image ? '' : '<span class="ph-label">title image</span>'}
   </div>
       <div class="card-meta">
