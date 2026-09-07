@@ -528,9 +528,13 @@
     card.href = '#' + r.id;
     card.onclick = (e) => { e.preventDefault(); showRecipe(r.id); };
     card.innerHTML = `
-      <div class="thumb" style="background:${r.color}">
-        <span class="ph-label">title image</span>
-      </div>
+const thumbStyle = r.image
+  ? `background-image:url('${r.image}');background-size:cover;background-position:center;`
+  : `background:${r.color};`;
+card.innerHTML = `
+  <div class="thumb" style="${thumbStyle}">
+    ${r.image ? '' : '<span class="ph-label">title image</span>'}
+  </div>
       <div class="card-meta">
         <span class="cat">${r.cat}</span>
         <h3>${r.title}</h3>
