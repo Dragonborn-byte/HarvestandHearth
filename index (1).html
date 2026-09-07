@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kitchen Notes — A Recipe Collection</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EDEAE1;
+    --paper-raised:#F6F4EE;
+    --ink:#22201C;
+    --ink-soft:#5B564C;
+    --line:#D8D3C5;
+    --olive:#4B5A3F;
+    --olive-deep:#38452F;
+    --clay:#A9744C;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Work Sans', sans-serif;
+    font-size:16px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  h1,h2,h3{
+    font-family:'Newsreader', serif;
+    font-weight:500;
+    margin:0;
+    color:var(--ink);
+  }
+
+  a{color:inherit;text-decoration:none;}
+
+  /* ---------- HEADER ---------- */
+  header.site{
+    padding:2.5rem 1.5rem 1.75rem;
+    border-bottom:1px solid var(--line);
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    flex-wrap:wrap;
+    gap:1rem;
+    max-width:1100px;
+    margin:0 auto;
+  }
+  header.site .title-block h1{
+    font-size:2.1rem;
+    letter-spacing:0.01em;
+  }
+  header.site .title-block p{
+    margin:.35rem 0 0;
+    color:var(--ink-soft);
+    font-size:.95rem;
+    max-width:36ch;
+  }
+  nav.site{
+    font-size:.9rem;
+  }
+  nav.site a{
+    color:var(--olive-deep);
+    border-bottom:1px solid transparent;
+    padding-bottom:2px;
+  }
+  nav.site a:hover{border-bottom-color:var(--olive-deep);}
+
+  main{max-width:1100px;margin:0 auto;padding:0 1.5rem 4rem;}
+
+  /* ---------- CONTENTS / GRID VIEW ---------- */
+  #contents-view .section-label{
+    display:block;
+    margin:2.5rem 0 1.25rem;
+    font-size:.85rem;
+    color:var(--ink-soft);
+  }
+
+  .filter-bar{
+    display:flex;
+    flex-wrap:wrap;
+    gap:.6rem;
+    margin-bottom:2rem;
+  }
+  .filter-pill{
+    font-family:'Work Sans', sans-serif;
+    font-size:.85rem;
+    background:none;
+    border:1px solid var(--line);
+    color:var(--ink-soft);
+    padding:.45rem 1rem;
+    border-radius:999px;
+    cursor:pointer;
+    transition:border-color .2s ease, color .2s ease, background .2s ease;
+  }
+  .filter-pill:hover{border-color:var(--olive);color:var(--ink);}
+  .filter-pill.active{
+    background:var(--olive-deep);
+    border-color:var(--olive-deep);
+    color:var(--paper-raised);
+  }
+  .filter-count{
+    align-self:center;
+    font-size:.8rem;
+    color:var(--ink-soft);
+    margin-left:.25rem;
+  }
+
+  .recipe-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(230px, 1fr));
+    gap:1.75rem 1.5rem;
+  }
+  .recipe-card.filtered-out{display:none;}
+  .empty-state{
+    color:var(--ink-soft);
+    font-size:.9rem;
+    padding:2rem 0;
+    display:none;
+  }
+  .empty-state.show{display:block;}
+
+  .recipe-card{
+    display:block;
+    cursor:pointer;
+    border:none;
+    background:none;
+    padding:0;
+    text-align:left;
+  }
+  .recipe-card .thumb{
+    aspect-ratio:4/5;
+    width:100%;
+    border-radius:2px;
+    display:flex;
+    align-items:flex-end;
+    padding:1rem;
+    position:relative;
+    overflow:hidden;
+    transition:transform .35s ease;
+  }
+  .recipe-card:hover .thumb{transform:translateY(-3px);}
+  .recipe-card .thumb::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(to top, rgba(0,0,0,.35), rgba(0,0,0,0) 55%);
+  }
+  .recipe-card .thumb span.ph-label{
+    position:relative;
+    z-index:1;
+    color:rgba(255,255,255,.85);
+    font-size:.72rem;
+    letter-spacing:.02em;
+  }
+  .recipe-card .card-meta{
+    margin-top:.75rem;
+  }
+  .recipe-card .card-meta .cat{
+    font-size:.75rem;
+    color:var(--clay);
+    display:block;
+    margin-bottom:.15rem;
+  }
+  .recipe-card .card-meta h3{
+    font-size:1.15rem;
+    line-height:1.25;
+  }
+
+  /* ---------- RECIPE DETAIL VIEW ---------- */
+  .recipe-view{display:none;}
+  .recipe-view.active{display:block;}
+  #contents-view.hidden{display:none;}
+
+  .back-link{
+    display:inline-block;
+    margin:2rem 0 1.5rem;
+    font-size:.85rem;
+    color:var(--ink-soft);
+  }
+  .back-link:hover{color:var(--ink);}
+
+  .recipe-hero{
+    aspect-ratio:16/7;
+    border-radius:2px;
+    margin-bottom:2rem;
+    display:flex;
+    align-items:flex-end;
+    padding:1.5rem;
+    position:relative;
+    overflow:hidden;
+  }
+  .recipe-hero::after{
+    content:"";
+    position:absolute;inset:0;
+    background:linear-gradient(to top, rgba(0,0,0,.4), rgba(0,0,0,0) 60%);
+  }
+  .recipe-hero span.ph-label{
+    position:relative;z-index:1;
+    color:rgba(255,255,255,.85);
+    font-size:.8rem;
+  }
+
+  .recipe-header .cat{
+    font-size:.85rem;
+    color:var(--clay);
+  }
+  .recipe-header h2{
+    font-size:2.4rem;
+    margin:.35rem 0 .75rem;
+    line-height:1.15;
+  }
+  .recipe-header .dek{
+    color:var(--ink-soft);
+    max-width:60ch;
+    font-size:1rem;
+  }
+
+  .recipe-meta{
+    display:flex;
+    gap:2.25rem;
+    margin:1.75rem 0 2.5rem;
+    padding:1rem 0;
+    border-top:1px solid var(--line);
+    border-bottom:1px solid var(--line);
+    flex-wrap:wrap;
+  }
+  .recipe-meta .stat{font-size:.85rem;}
+  .recipe-meta .stat strong{
+    display:block;
+    font-family:'Newsreader', serif;
+    font-size:1.15rem;
+    font-weight:500;
+    color:var(--ink);
+  }
+  .recipe-meta .stat span{color:var(--ink-soft);}
+
+  .recipe-body{
+    display:grid;
+    grid-template-columns:1fr 1.6fr;
+    gap:3rem;
+  }
+
+  .ingredients h4, .method h4{
+    font-family:'Newsreader', serif;
+    font-weight:500;
+    font-size:1.1rem;
+    margin-bottom:1rem;
+    padding-bottom:.5rem;
+    border-bottom:1px solid var(--line);
+  }
+
+  .ingredients ul{
+    list-style:none;
+    margin:0;
+    padding:0;
+  }
+  .ingredients li{
+    padding:.5rem 0;
+    border-bottom:1px dotted var(--line);
+    font-size:.95rem;
+  }
+  .ingredients li:last-child{border-bottom:none;}
+
+  .method ol{
+    margin:0;
+    padding:0;
+    list-style:none;
+    counter-reset:step;
+  }
+  .method li{
+    counter-increment:step;
+    position:relative;
+    padding:0 0 1.5rem 2.6rem;
+    font-size:.98rem;
+  }
+  .method li::before{
+    content:counter(step);
+    position:absolute;
+    left:0;top:0;
+    width:1.8rem;height:1.8rem;
+    border:1px solid var(--olive);
+    color:var(--olive-deep);
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:'Newsreader', serif;
+    font-size:.85rem;
+  }
+
+  .recipe-note{
+    margin-top:2.5rem;
+    padding:1.25rem 1.5rem;
+    background:var(--paper-raised);
+    border-left:2px solid var(--olive);
+    font-size:.9rem;
+    color:var(--ink-soft);
+  }
+
+  footer.site{
+    text-align:center;
+    padding:2rem 1.5rem 3rem;
+    color:var(--ink-soft);
+    font-size:.8rem;
+  }
+
+  @media (max-width:680px){
+    .recipe-body{grid-template-columns:1fr;gap:2rem;}
+    .recipe-header h2{font-size:1.85rem;}
+  }
+
+  /* ---------- PRINT ---------- */
+  @media print{
+    body{background:#fff;}
+    header.site, footer.site, .back-link, #contents-view{display:none !important;}
+    .recipe-view{display:block !important;}
+    main{padding:0;max-width:none;}
+    .recipe-hero{aspect-ratio:auto;height:2.4in;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    .recipe-meta{border-color:#ccc;}
+    .ingredients h4,.method h4{border-color:#ccc;}
+    .method li::before{border-color:#000;color:#000;}
+    a{color:inherit;}
+  }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="title-block">
+    <h1>Kitchen Notes</h1>
+    <p>A working collection of recipes worth keeping — for the screen, and for the counter.</p>
+  </div>
+  <nav class="site"><a href="#" onclick="showContents();return false;">Contents</a></nav>
+</header>
+
+<main>
+
+  <!-- ===== CONTENTS VIEW ===== -->
+  <section id="contents-view">
+    <span class="section-label" id="recipe-count-label">Contents — 6 recipes</span>
+    <div class="filter-bar" id="filter-bar"></div>
+    <div class="recipe-grid" id="recipe-grid"></div>
+    <p class="empty-state" id="empty-state">No recipes in this category yet.</p>
+  </section>
+
+  <!-- ===== RECIPE VIEWS (populated by JS) ===== -->
+  <div id="recipe-views"></div>
+
+</main>
+
+<footer class="site">Kitchen Notes — placeholder edition. Replace title images and recipe text with your own.</footer>
+
+<script>
+  const recipes = [
+    {
+      id: "roast-tomato-soup",
+      cat: "Soup",
+      title: "Scrambled Eggs",
+      dek: "Slow-roasted until sweet, blended with basil and a swirl of cream.",
+      color: "#8A5A3B",
+      image: "images/scrambled-eggs.jpeg",
+      time: "45 min",
+      serves: "4",
+      difficulty: "Easy",
+      ingredients: [
+        "1.5 kg ripe tomatoes, halved",
+        "1 white onion, quartered",
+        "4 cloves garlic, skin on",
+        "3 tbsp olive oil",
+        "500 ml vegetable stock",
+        "Handful fresh basil",
+        "2 tbsp cream, to serve",
+        "Salt and pepper"
+      ],
+      steps: [
+        "Heat oven to 200°C. Toss tomatoes, onion and garlic with olive oil, salt and pepper on a tray.",
+        "Roast for 35 minutes until caramelised at the edges.",
+        "Squeeze garlic from its skin and blend everything with the stock and basil until smooth.",
+        "Warm through, adjust seasoning, and serve with a swirl of cream."
+      ],
+      note: "Placeholder recipe — swap in your own method and photograph."
+    },
+    {
+      id: "brown-butter-pasta",
+      cat: "Mains",
+      title: "Brown Butter & Sage Pasta",
+      dek: "A five-ingredient weeknight staple that tastes like more effort than it is.",
+      color: "#5C6B45",
+      time: "20 min",
+      serves: "2",
+      difficulty: "Easy",
+      ingredients: [
+        "220 g pasta (tagliatelle or similar)",
+        "80 g unsalted butter",
+        "10 fresh sage leaves",
+        "Parmesan, finely grated",
+        "Salt, black pepper"
+      ],
+      steps: [
+        "Cook pasta in salted water until al dente; reserve a cup of the water.",
+        "Melt butter in a wide pan over medium heat until it turns golden and smells nutty.",
+        "Add sage leaves and fry until crisp, about 30 seconds.",
+        "Toss in the pasta with a splash of pasta water, finish with parmesan and pepper."
+      ],
+      note: "Placeholder recipe — swap in your own method and photograph."
+    },
+    {
+      id: "citrus-olive-cake",
+      cat: "Baking",
+      title: "Citrus Olive Oil Cake",
+      dek: "Moist, dense, and just sweet enough — good with coffee any time of day.",
+      color: "#B08A3E",
+      time: "1 hr 10 min",
+      serves: "8",
+      difficulty: "Moderate",
+      ingredients: [
+        "250 g plain flour",
+        "1½ tsp baking powder",
+        "3 eggs",
+        "200 g caster sugar",
+        "180 ml olive oil",
+        "Zest of 2 oranges, 1 lemon",
+        "120 ml fresh orange juice"
+      ],
+      steps: [
+        "Heat oven to 170°C and line a 22cm cake tin.",
+        "Whisk eggs and sugar until pale and thick.",
+        "Slowly whisk in olive oil, citrus zest and juice.",
+        "Fold through flour and baking powder gently, pour into tin.",
+        "Bake 45–50 minutes until a skewer comes out clean. Cool before slicing."
+      ],
+      note: "Placeholder recipe — swap in your own method and photograph."
+    },
+    {
+      id: "charred-corn-salad",
+      cat: "Sides",
+      title: "Charred Corn & Lime Salad",
+      dek: "Bright, smoky, and quick — a reliable side for anything off the grill.",
+      color: "#C9A227",
+      time: "15 min",
+      serves: "4",
+      difficulty: "Easy",
+      ingredients: [
+        "4 corn cobs, husked",
+        "2 tbsp olive oil",
+        "1 red chilli, finely sliced",
+        "Juice of 2 limes",
+        "Small bunch coriander, chopped",
+        "60 g feta, crumbled",
+        "Salt"
+      ],
+      steps: [
+        "Char corn on a hot grill or griddle pan, turning until blistered all over.",
+        "Cool slightly, then slice kernels off the cob into a bowl.",
+        "Toss with chilli, lime juice, coriander and salt.",
+        "Top with crumbled feta just before serving."
+      ],
+      note: "Placeholder recipe — swap in your own method and photograph."
+    },
+    {
+      id: "braised-short-rib",
+      cat: "Mains",
+      title: "Red Wine Braised Short Rib",
+      dek: "Low and slow until it falls off the bone — best made a day ahead.",
+      color: "#6B3A2E",
+      time: "3 hr 30 min",
+      serves: "4",
+      difficulty: "Involved",
+      ingredients: [
+        "1.5 kg beef short rib, bone-in",
+        "2 carrots, chopped",
+        "2 celery stalks, chopped",
+        "1 onion, chopped",
+        "500 ml red wine",
+        "500 ml beef stock",
+        "2 bay leaves",
+        "2 sprigs thyme"
+      ],
+      steps: [
+        "Sear short ribs on all sides in a heavy pot until deeply browned. Set aside.",
+        "Soften carrots, celery and onion in the same pot.",
+        "Return ribs, add wine, stock, bay and thyme. Bring to a simmer.",
+        "Cover and cook at 150°C for 3 hours until meat is very tender.",
+        "Rest, skim fat from the sauce, and serve spooned over."
+      ],
+      note: "Placeholder recipe — swap in your own method and photograph."
+    },
+    {
+      id: "yoghurt-flatbread",
+      cat: "Baking",
+      title: "No-Yeast Yoghurt Flatbread",
+      dek: "Ready in the time it takes the pan to heat — no proving required.",
+      color: "#9C7A4E",
+      time: "25 min",
+      serves: "4",
+      difficulty: "Easy",
+      ingredients: [
+        "250 g self-raising flour",
+        "250 g plain yoghurt",
+        "1 tsp salt",
+        "Olive oil, for cooking"
+      ],
+      steps: [
+        "Mix flour, yoghurt and salt into a soft dough. Knead briefly on a floured surface.",
+        "Divide into 4, roll each piece thin.",
+        "Cook in a hot dry pan for 1–2 minutes per side, until puffed and charred in spots.",
+        "Brush with olive oil and serve warm."
+      ],
+      note: "Placeholder recipe — swap in your own method and photograph."
+    }
+    {
+      id: "scrambled-eggs",
+      cat: "Breakfast",
+      title: "Soft Scrambled Eggs",
+      dek: "Low heat, constant motion, off the pan while they still look slightly underdone.",
+      color: "#D9A441",
+      image: "images/scrambled-eggs.jpeg",
+      time: "8 min",
+      serves: "1–2",
+      difficulty: "Easy",
+      ingredients: [
+        "4 large eggs",
+        "20 g butter",
+        "1 tbsp cream or milk (optional)",
+        "Salt, to taste",
+        "Chives, chopped (optional)"
+      ],
+      steps: [
+        "Whisk eggs with a pinch of salt and the cream, if using, until fully combined.",
+        "Melt butter in a non-stick pan over low heat.",
+        "Add eggs and stir slowly and constantly with a spatula, keeping the heat low.",
+        "Remove from the pan just before fully set — they'll finish cooking in the residual heat.",
+        "Scatter with chives and serve immediately."
+      ],
+      note: "Placeholder recipe — swap in your own method once you're happy with the wording."
+    }
+  ];
+
+  const grid = document.getElementById('recipe-grid');
+  const viewsContainer = document.getElementById('recipe-views');
+
+  recipes.forEach(r => {
+    // contents card
+    const card = document.createElement('a');
+    card.className = 'recipe-card';
+    card.dataset.category = r.cat;
+    card.href = '#' + r.id;
+    card.onclick = (e) => { e.preventDefault(); showRecipe(r.id); };
+    const thumbStyle = r.image
+      ? `background-image:url('${r.image}');background-size:cover;background-position:center;`
+      : `background:${r.color};`;
+    card.innerHTML = `
+      <div class="thumb" style="${thumbStyle}">
+        ${r.image ? '' : '<span class="ph-label">title image</span>'}
+      </div>
+      <div class="card-meta">
+        <span class="cat">${r.cat}</span>
+        <h3>${r.title}</h3>
+      </div>
+    `;
+    grid.appendChild(card);
+
+    // detail view
+    const view = document.createElement('section');
+    view.className = 'recipe-view';
+    view.id = 'view-' + r.id;
+    const heroStyle = r.image
+      ? `background-image:url('${r.image}');background-size:cover;background-position:center;`
+      : `background:${r.color};`;
+    view.innerHTML = `
+      <a href="#" class="back-link" onclick="showContents();return false;">← Back to contents</a>
+      <div class="recipe-hero" style="${heroStyle}">
+        ${r.image ? '' : '<span class="ph-label">title image</span>'}
+      </div>
+      <div class="recipe-header">
+        <span class="cat">${r.cat}</span>
+        <h2>${r.title}</h2>
+        <p class="dek">${r.dek}</p>
+      </div>
+      <div class="recipe-meta">
+        <div class="stat"><strong>${r.time}</strong><span>Time</span></div>
+        <div class="stat"><strong>${r.serves}</strong><span>Serves</span></div>
+        <div class="stat"><strong>${r.difficulty}</strong><span>Difficulty</span></div>
+      </div>
+      <div class="recipe-body">
+        <div class="ingredients">
+          <h4>Ingredients</h4>
+          <ul>${r.ingredients.map(i => `<li>${i}</li>`).join('')}</ul>
+        </div>
+        <div class="method">
+          <h4>Method</h4>
+          <ol>${r.steps.map(s => `<li>${s}</li>`).join('')}</ol>
+        </div>
+      </div>
+      <div class="recipe-note">${r.note}</div>
+    `;
+    viewsContainer.appendChild(view);
+  });
+
+  // ---- filtering ----
+  const filterBar = document.getElementById('filter-bar');
+  const countLabel = document.getElementById('recipe-count-label');
+  const emptyState = document.getElementById('empty-state');
+  const categories = ['All', ...new Set(recipes.map(r => r.cat))];
+  let activeCategory = 'All';
+
+  categories.forEach(cat => {
+    const pill = document.createElement('button');
+    pill.className = 'filter-pill' + (cat === 'All' ? ' active' : '');
+    pill.textContent = cat;
+    pill.type = 'button';
+    pill.onclick = () => setFilter(cat);
+    filterBar.appendChild(pill);
+  });
+
+  function setFilter(cat){
+    activeCategory = cat;
+    document.querySelectorAll('.filter-pill').forEach(p => {
+      p.classList.toggle('active', p.textContent === cat);
+    });
+
+    let visibleCount = 0;
+    document.querySelectorAll('.recipe-card').forEach(card => {
+      const match = cat === 'All' || card.dataset.category === cat;
+      card.classList.toggle('filtered-out', !match);
+      if (match) visibleCount++;
+    });
+
+    emptyState.classList.toggle('show', visibleCount === 0);
+    countLabel.textContent = cat === 'All'
+      ? `Contents — ${visibleCount} recipe${visibleCount !== 1 ? 's' : ''}`
+      : `${cat} — ${visibleCount} recipe${visibleCount !== 1 ? 's' : ''}`;
+  }
+
+  setFilter('All');
+
+  function showContents(){
+    document.getElementById('contents-view').classList.remove('hidden');
+    document.querySelectorAll('.recipe-view').forEach(v => v.classList.remove('active'));
+    window.scrollTo({top:0, behavior:'smooth'});
+    history.replaceState(null, '', '#');
+  }
+
+  function showRecipe(id){
+    document.getElementById('contents-view').classList.add('hidden');
+    document.querySelectorAll('.recipe-view').forEach(v => v.classList.remove('active'));
+    document.getElementById('view-' + id).classList.add('active');
+    window.scrollTo({top:0, behavior:'smooth'});
+    history.replaceState(null, '', '#' + id);
+  }
+
+  // handle direct link / back-forward navigation
+  window.addEventListener('hashchange', () => {
+    const id = location.hash.replace('#','');
+    if (id && document.getElementById('view-' + id)) {
+      showRecipe(id);
+    } else {
+      showContents();
+    }
+  });
+  if (location.hash) {
+    const id = location.hash.replace('#','');
+    if (document.getElementById('view-' + id)) showRecipe(id);
+  }
+</script>
+
+</body>
+</html>
